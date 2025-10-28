@@ -119,6 +119,19 @@ section h3 {
   background: #f4f6ff;
   color: #1a237e;
   font-size: 14px;
+  list-style: none;
+}
+
+.participants .delete-icon {
+  cursor: pointer;
+  color: #c62828;
+  opacity: 0.7;
+  margin-left: auto;
+  padding: 4px;
+}
+
+.participants .delete-icon:hover {
+  opacity: 1;
 }
 
 /* Avatar / initial circle */
