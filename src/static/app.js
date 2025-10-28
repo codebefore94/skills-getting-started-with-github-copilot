@@ -13,6 +13,17 @@ document.addEventListener("DOMContentLoaded", () => {
       // Clear loading message
       activitiesList.innerHTML = "";
 
+      // Helper to safely escape text for HTML injection prevention
+      function escapeHtml(str) {
+        if (!str && str !== 0) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
@@ -20,11 +31,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        // Build participants HTML
+        const participants = Array.isArray(details.participants) ? details.participants : [];
+        let participantsHtml = "";
+        if (participants.length > 0) {
+          const items = participants
+            .map((p) => {
+              const display = escapeHtml(p);
+              // create initials for avatar (from email or name)
+              const initials = escapeHtml(
+                (String(p)
+                  .split(/[\s@._-]+/)
+                  .filter(Boolean)
+                  .map(s => s[0])
+                  .slice(0,2)
+                  .join("")
+                ).toUpperCase()
+              );
+              return `<li><span class="avatar">${initials || "?"}</span><span class="name">${display}</span></li>`;
+            })
+            .join("");
+          participantsHtml = `<div class="participants"><h5>Participants <span class="count">${participants.length}</span></h5><ul>${items}</ul></div>`;
+        } else {
+          participantsHtml = `<div class="participants"><h5>Participants <span class="count">0</span></h5><p class="muted">No participants yet. Be the first to sign up!</p></div>`;
+        }
+
         activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
+          <h4>${escapeHtml(name)}</h4>
+          <p>${escapeHtml(details.description)}</p>
+          <p><strong>Schedule:</strong> ${escapeHtml(details.schedule)}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          ${participantsHtml}
         `;
 
         activitiesList.appendChild(activityCard);
